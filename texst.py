@@ -5,6 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 import pprint
 import json
+from urllib.parse import urlparse
 
 with open('./json/example.before', 'r') as e:
 
@@ -30,6 +31,28 @@ with open('./json/example.before', 'r') as e:
                 link = anchors[0]['href']
                 title = g.find('h3').text
                 
+# NEXT ALTERNATIVE ATTEMPT: CHECK BASE URL FOR /sitemap.xml or /stat.js
+                print('link is::::::::: ')
+                print(link)
+# NOW PULL BASE URL
+                o = urlparse(link)
+                oo = o.scheme + '://' + o.netloc
+
+                print('ooooooooo')
+                print(oo)
+                resp_two = requests.get(oo, headers=headers)
+                print(resp_two.status_code)
+                if resp_two.status_code == 200:
+                    more_soup = BeautifulSoup(resp_two.content, "html.parser")
+                else:
+                    print('aaaaah fuuuuuuuckkk')
+                    break
+                more_results = []
+                for m in more_soup.find_all('url', class_='r'):
+                    more_anchors = m.find_all('loc')
+                    if more_anchors:
+                        print('there are more anchors')
+
 
 
 #                item = {
@@ -38,28 +61,41 @@ with open('./json/example.before', 'r') as e:
 #                }
 #                results.append(item)
                 results.append(link)
+
+
+
+
+# uuuugggghhhh 
+# this section is supposed to count the H2 tags in the document
+# also see countH2.py
+
 # now read the html from the website
-        for item in results:
-            linklink = item
-            print('item is: ' + item)
-            print('link is: ' + linklink)
-            respresp = requests.get(link, headers=headers)
-            print('respresp is: ' + respresp)
-            if respresp.status_code == 200:
-                soupsoup = BeautifulSoup(respresp.content, "html.parser")
-                print(soupsoup)
-            hackerCounter = 0
-            for h in soupsoup.find_all('div', class_='r'):
-                moreAnchors = h.find_all('h2')
-                print(moreAnchors)
-                if moreAnchors:
-                    hackerCounter += 1
-                    print(hackerCounter)
+#        for item in results:
+#            print('item is: ' + item)
+#            respresp = requests.get(item, headers=headers)
+            
+#            if respresp.status_code == 200:
+#                soupsoup = BeautifulSoup(respresp.content, "html.parser")
+#                print(soupsoup)
+#            hackerCounter = 0
+            #for h in soupsoup.find_all('h2', class_='r'):
+                #moreAnchors = h.find_all('h2')
+                #print(moreAnchors)
+                #if moreAnchors:
+                    #hackerCounter += 1
+                    #print(hackerCounter)
+            #for tag in soup.find_all():
+                #print tag.name
+
+            
+
+
 
 
 #        pprint.pprint(results)
 
-
+# ALL THE EXTRA FILE WRITES BELOW WERE FROM THE COMMENTED OUT item VAR ABOVE
+# IT ENDED UP BEING TOO COMPLEX, EASIER TO JUST WRITE STRAIGHT TO FILE
 #        pprint.pprint(results[-1]) 
         with open("./json/testing.txt", "a") as file:
 #            file.writelines('[' + '\n')
@@ -67,5 +103,8 @@ with open('./json/example.before', 'r') as e:
             file.writelines("%s\n" % result for result in results)
 #            file.writelines('\n' + ']')
 #            file.writelines("what tho")
+
+# WHERE IS THE EXTRA [] COMING FROM IN THE TXT FILE?????
+
         if not line:
             break
