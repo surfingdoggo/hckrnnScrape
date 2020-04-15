@@ -22,7 +22,9 @@ with open('./json/example.before', 'r') as e:
 
         if resp.status_code == 200:
             soup = BeautifulSoup(resp.content, "html.parser")
-
+        # HTTPConnectionPool fails before else:
+        else:
+            print('status code !==200 ooof')
 
         results = []
         for g in soup.find_all('div', class_='r'):
@@ -36,22 +38,22 @@ with open('./json/example.before', 'r') as e:
                 print(link)
 # NOW PULL BASE URL
                 o = urlparse(link)
-                oo = o.scheme + '://' + o.netloc
+               
+                oo = o.scheme + '://' + o.netloc + '/sitemap.xml'
 
                 print('ooooooooo')
                 print(oo)
+                # no but this is printing still 
                 resp_two = requests.get(oo, headers=headers)
+                print('made it')
                 print(resp_two.status_code)
                 if resp_two.status_code == 200:
                     more_soup = BeautifulSoup(resp_two.content, "html.parser")
-                else:
-                    print('aaaaah fuuuuuuuckkk')
-                    break
-                more_results = []
-                for m in more_soup.find_all('url', class_='r'):
-                    more_anchors = m.find_all('loc')
-                    if more_anchors:
-                        print('there are more anchors')
+                    more_results = []
+                    for m in more_soup.find_all('url', class_='r'):
+                        more_anchors = m.find_all('loc')
+                        if more_anchors:
+                            print('there are more anchors')
 
 
 
